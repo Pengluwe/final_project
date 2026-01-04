@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SkyMemories - 個人雲端飛行日記 (Personal Flight Diary)
 
 SkyMemories 是一個專為旅客設計的 Web 應用程式，旨在數位化管理個人的飛行紀錄。使用者可以透過此平台記錄每一趟旅程的詳細資訊（如航空公司、航線、座艙心得、照片紀錄、機身編號），並透過世界地圖視覺化飛行足跡。
@@ -67,3 +68,6 @@ npm start
 - [API 規格說明文件](docs/api-spec.md)
 - [系統架構說明](docs/architecture.md)
 - [系統流程圖說明](docs/flowchart.md)
+=======
+# final_project
+>>>>>>> 299d4ebc69564314094b39bdeaf510ff5683e869
