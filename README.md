@@ -69,7 +69,7 @@ cd docker && docker-compose up -d
 ```
 
 ### 5. 初始化資料 (Seed Database)
-初始化機場資料庫，以便地圖功能正常運作 (強烈建議執行)：
+初始化機場資料庫，以便地圖功能正常運作：
 ```bash
 cd backend
 node seedAirports.js
@@ -78,7 +78,7 @@ node seedAirports.js
 ## 使用指引 (Usage Guidelines)
 
 ### 啟動應用程式
-最簡單的方式是在 Windows 環境下使用我們提供的腳本：
+最簡單的方式是在 Windows 環境下使用提供的腳本：
 ```bash
 .\scripts\start_app.bat
 ```
@@ -129,7 +129,38 @@ root/
 ```
 
 ## 設計模式應用 (Design Patterns Used)
-*   **MVC (Model-View-Controller)**: 後端架構設計。
-*   **Observer Pattern (觀察者模式)**: 前端透過 React Context API 管理全域狀態。
-*   **Singleton Pattern (單例模式)**: 資料庫連線與 Express 應用實例。
-*   **Factory Pattern (工廠模式)**: 使用 Axios 建立 API 實例。
+
+本專案在開發過程中應用了多種經典設計模式，以確保程式碼的可維護性、擴充性與結構清晰度。
+
+### 1. 後端 (Backend)
+
+#### MVC 模式 (Model-View-Controller)
+*   **模式說明**: 將應用程式邏輯區分為資料模型 (Model)、視圖 (View, 本專案為 JSON Response) 與控制器 (Controller)。
+*   **應用場景**: 構建 RESTful API 時，分離資料存取與業務邏輯。
+*   **專案實作**:
+    *   **Model**: `models/User.js`, `models/Flight.js` 定義資料結構與資料庫操作。
+    *   **Controller**: `controllers/flightController.js` 處理請求邏輯與流程控制。
+    *   **View**: 回傳的 JSON 格式資料。
+
+#### Singleton 模式 (單例模式)
+*   **模式說明**: 確保一個類別只有一個實例，並提供一個全域存取點。
+*   **應用場景**: 管理共享資源，如資料庫連線或應用程式設定。
+*   **專案實作**:
+    *   `mongoose.connect` 在整個應用程式生命週期中維護單一資料庫連線池。
+    *   `src/services/api.js` 中的 Axios 實例也是單例，統一管理請求設定。
+
+### 2. 前端 (Frontend)
+
+#### Observer 模式 (觀察者模式)
+*   **模式說明**: 定義物件間的一對多依賴，當物件狀態改變時，所有依賴者都會收到通知並自動更新。
+*   **應用場景**: 管理全域狀態 (如使用者登入狀態)，當狀態改變時，所有相關 UI 元件需同步更新。
+*   **專案實作**:
+    *   **Subject**: `AuthContext.jsx` 中的 `AuthProvider` 維護 `user` 狀態。
+    *   **Observer**: 使用 `useAuth()` Hook 的所有元件 (如 `Dashboard`, `Login`)。當 `user` 登入或登出時，這些元件會自動重新渲染 (Re-render)。
+
+#### Factory 模式 (工廠模式)
+*   **模式說明**: 定義一個介面用於建立物件，但讓子類別決定實例化哪一個類別。
+*   **應用場景**: 封裝物件建立的複雜過程。
+*   **專案實作**:
+    *   `src/services/api.js` 使用 `axios.create()` 工廠方法來建立具有預設配置 (Base URL, Timeout) 的 HTTP Client 實例。
+
