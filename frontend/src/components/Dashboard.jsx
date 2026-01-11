@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, isAdmin } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -34,6 +34,13 @@ const Dashboard = () => {
                                     Welcome, {user?.username}!
                                 </span>
                             </li>
+                            {isAdmin && (
+                                <li className="nav-item me-2">
+                                    <Link className="btn btn-danger" to="/admin">
+                                        Admin Panel
+                                    </Link>
+                                </li>
+                            )}
                             <li className="nav-item">
                                 <button className="btn btn-outline-light" onClick={handleLogout}>
                                     Logout

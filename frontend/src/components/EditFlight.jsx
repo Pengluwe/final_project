@@ -79,6 +79,10 @@ const EditFlight = () => {
         setNewPhotos(Array.from(e.target.files));
     };
 
+    const handleDeletePhoto = (indexToDelete) => {
+        setExistingPhotos(existingPhotos.filter((_, index) => index !== indexToDelete));
+    };
+
     const validateForm = () => {
         const errors = {};
 
@@ -294,7 +298,18 @@ const EditFlight = () => {
                                         <label className="form-label">Current Photos</label>
                                         <div className="d-flex flex-wrap gap-2 mb-2">
                                             {existingPhotos.map((url, index) => (
-                                                <img key={index} src={url} alt={`Flight ${index}`} style={{ width: '100px', height: '100px', objectFit: 'cover' }} className="img-thumbnail" />
+                                                <div key={index} className="position-relative">
+                                                    <img src={url} alt={`Flight ${index}`} style={{ width: '100px', height: '100px', objectFit: 'cover' }} className="img-thumbnail" />
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle p-0"
+                                                        style={{ width: '24px', height: '24px', transform: 'translate(30%, -30%)' }}
+                                                        onClick={() => handleDeletePhoto(index)}
+                                                        title="Remove photo"
+                                                    >
+                                                        &times;
+                                                    </button>
+                                                </div>
                                             ))}
                                             {existingPhotos.length === 0 && <p className="text-muted">No photos uploaded</p>}
                                         </div>

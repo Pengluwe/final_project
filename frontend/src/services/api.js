@@ -19,6 +19,7 @@ api.interceptors.request.use((config) => {
 export const authAPI = {
     register: (userData) => api.post('/auth/register', userData),
     login: (credentials) => api.post('/auth/login', credentials),
+    getMe: () => api.get('/auth/me'),
 };
 
 // Flights API
@@ -45,6 +46,13 @@ export const airportAPI = {
     search: (query) => api.get(`/airports/search?query=${query}`),
     getByCode: (code) => api.get(`/airports/${code}`),
     getBatch: (codes) => api.post('/airports/batch', { codes }),
+};
+
+// Admin API
+export const adminAPI = {
+    getAllUsers: () => api.get('/admin/users'),
+    deleteUser: (id) => api.delete(`/admin/users/${id}`),
+    getStats: () => api.get('/admin/stats'),
 };
 
 export default api;

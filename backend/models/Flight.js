@@ -50,4 +50,7 @@ const flightSchema = new mongoose.Schema({
     timestamps: true,
 });
 
+// Index for efficient retrieval of user's flights sorted by date
+flightSchema.index({ userId: 1, date: -1 });
+
 module.exports = mongoose.model('Flight', flightSchema);

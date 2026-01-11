@@ -37,6 +37,7 @@ exports.register = async (req, res) => {
                 id: user._id,
                 username: user.username,
                 email: user.email,
+                role: user.role,
             },
         });
     } catch (error) {
@@ -71,10 +72,21 @@ exports.login = async (req, res) => {
                 id: user._id,
                 username: user.username,
                 email: user.email,
+                role: user.role,
             },
         });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Server error during login' });
+    }
+};
+// Get current user info
+exports.getMe = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password');
+        res.json(user);
+    } catch (error) {
+        console.error('Get Me error:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };

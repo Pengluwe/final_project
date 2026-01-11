@@ -17,12 +17,30 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         // Check if user is logged in on mount
-        const token = localStorage.getItem('token');
-        const userData = localStorage.getItem('user');
-        if (token && userData) {
-            setUser(JSON.parse(userData));
-        }
-        setLoading(false);
+        const loadUser = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                // Verify token and get fresh user data
+                const response = await authAPI.getMe();
+                setUser(response.data);
+                // Update localStorage with fresh data
+                localStorage.setItem('user', JSON.stringify(response.data));
+            } catch (error) {
+                console.error('Token invalid or expired', error);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadUser();
     }, []);
 
     const login = async (credentials) => {
@@ -63,6 +81,7 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         isAuthenticated: !!user,
+        isAdmin: user?.role === 'admin',
     };
 
     if (loading) {

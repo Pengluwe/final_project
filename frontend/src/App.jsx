@@ -8,6 +8,7 @@ import AddFlight from './components/AddFlight';
 import EditFlight from './components/EditFlight';
 import FlightDetail from './components/FlightDetail';
 import FlightMap from './components/FlightMap';
+import AdminDashboard from './components/AdminDashboard';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -86,6 +87,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <FlightMap />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
           </ProtectedRoute>
         }
       />
