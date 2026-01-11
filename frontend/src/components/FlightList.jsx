@@ -59,7 +59,7 @@ const FlightList = () => {
 
             <div className="container py-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h2>My Flights</h2>
+                    <h2 className="text-white text-shadow">My Flights</h2>
                     <Link to="/flights/add" className="btn btn-primary">
                         <i className="bi bi-plus-circle me-2"></i>
                         Add Flight
@@ -70,8 +70,8 @@ const FlightList = () => {
 
                 {flights.length === 0 ? (
                     <div className="text-center py-5">
-                        <i className="bi bi-inbox display-1 text-muted"></i>
-                        <p className="text-muted mt-3">No flights recorded yet</p>
+                        <i className="bi bi-inbox display-1 text-white text-shadow"></i>
+                        <p className="text-white text-shadow mt-3">No flights recorded yet</p>
                         <Link to="/flights/add" className="btn btn-primary">
                             Add Your First Flight
                         </Link>
@@ -116,6 +116,12 @@ const FlightList = () => {
                                                 className="btn btn-sm btn-outline-primary flex-grow-1"
                                             >
                                                 View
+                                            </Link>
+                                            <Link
+                                                to={`/flights/edit/${flight._id}`}
+                                                className="btn btn-sm btn-outline-secondary flex-grow-1"
+                                            >
+                                                Edit
                                             </Link>
                                             <button
                                                 onClick={() => handleDelete(flight._id)}

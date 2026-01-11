@@ -5,6 +5,7 @@ import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import FlightList from './components/FlightList';
 import AddFlight from './components/AddFlight';
+import EditFlight from './components/EditFlight';
 import FlightDetail from './components/FlightDetail';
 import FlightMap from './components/FlightMap';
 
@@ -61,6 +62,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AddFlight />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/flights/edit/:id"
+        element={
+          <ProtectedRoute>
+            <EditFlight />
           </ProtectedRoute>
         }
       />

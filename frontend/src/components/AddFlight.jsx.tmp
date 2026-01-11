@@ -1,0 +1,56 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { flightsAPI, uploadAPI, airportAPI } from '../services/api';
+
+const AddFlight = () => {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [generalError, setGeneralError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [availableAirports, setAvailableAirports] = useState([]);
+
+    const [formData, setFormData] = useState({
+        airline: '',
+        flightNumber: '',
+        departure: '',
+        destination: '',
+        date: '',
+        seatClass: 'Economy',
+        notes: '',
+        aircraftReg: '',
+    });
+    const [photos, setPhotos] = useState([]);
+
+    useEffect(() => {
+        const fetchAirports = async () => {
+            try {
+                // Fetch all airports by searching with empty string to get initial list
+                // Alternatively, we can add a getAll endpoint, but search with empty string might return limited results depending on implementation.
+                // Let's modify airportAPI to have a getAll or use search with a broad query.
+                // Looking at previous controller, search returns limited 10 results.
+                // Let's implement a getAll in backend actually, but for now user only seeded 30.
+                // Let's just create a getAll endpoint or use a workaround.
+                // Actually the current controller searchAirports returns 10.
+                // Let's try to get specific airports or just list the ones we seeded.
+                // Since I can't easily change backend right now without user permission (though I did just write it),
+                // best approach is to fetch all airports.
+                // Let's assume for now we can fetch via search with a common letter or just add a getAll to controller.
+                
+                // WAIT, I created the controller. It has searchAirports (limit 10), getAirportsByCodes, getAirportByCode.
+                // It does NOT have getAll.
+                // I should add getAll to backend to support this dropdown properly.
+                // BUT, to avoid context switching too much, let's see if I can use what I have.
+                // I can't efficiently get all 30.
+                
+                // Let's modify the backend controller first to allow fetching all airports for the dropdown.
+                // This is a necessary step for "Selection" feature.
+            } catch (err) {
+                console.error("Failed to fetch airports", err);
+            }
+        };
+        // fetchAirports();
+    }, []);
+
+    // ... 
+};
+// ...

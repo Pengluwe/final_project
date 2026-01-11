@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import { Link } from 'react-router-dom';
-import { flightsAPI } from '../services/api';
+import { flightsAPI, airportAPI } from '../services/api';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -13,49 +13,57 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Airport coordinates (simplified - in production, use a proper airport database)
-const airportCoordinates = {
-    TPE: [25.0797, 121.2342],
-    NRT: [35.7647, 140.3864],
-    CDG: [49.0097, 2.5479],
-    LAX: [33.9416, -118.4085],
-    JFK: [40.6413, -73.7781],
-    LHR: [51.4700, -0.4543],
-    SIN: [1.3644, 103.9915],
-    HKG: [22.3080, 113.9185],
-    ICN: [37.4602, 126.4407],
-    SFO: [37.6213, -122.3790],
-};
-
 const FlightMap = () => {
     const [flights, setFlights] = useState([]);
+    const [airportCoords, setAirportCoords] = useState({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchFlights();
-    }, []);
+        const fetchData = async () => {
+            try {
+                // 1. Fetch all flights
+                const flightRes = await flightsAPI.getAll();
+                const flightData = flightRes.data;
+                setFlights(flightData);
 
-    const fetchFlights = async () => {
-        try {
-            const response = await flightsAPI.getAll();
-            setFlights(response.data);
-        } catch (err) {
-            console.error('Failed to load flights', err);
-        } finally {
-            setLoading(false);
-        }
-    };
+                if (flightData.length > 0) {
+                    // 2. Extract unique airport codes
+                    const codes = new Set();
+                    flightData.forEach(f => {
+                        codes.add(f.departure);
+                        codes.add(f.destination);
+                    });
+
+                    // 3. Fetch coordinates for these airports
+                    const airportRes = await airportAPI.getBatch(Array.from(codes));
+
+                    // 4. Map airport data to efficient lookup object
+                    const coordsMap = {};
+                    airportRes.data.forEach(airport => {
+                        coordsMap[airport.code] = [airport.coordinates.lat, airport.coordinates.lng];
+                    });
+                    setAirportCoords(coordsMap);
+                }
+            } catch (err) {
+                console.error('Failed to load map data', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const getFlightPaths = () => {
         return flights
             .filter(flight =>
-                airportCoordinates[flight.departure] &&
-                airportCoordinates[flight.destination]
+                airportCoords[flight.departure] &&
+                airportCoords[flight.destination]
             )
             .map(flight => ({
                 positions: [
-                    airportCoordinates[flight.departure],
-                    airportCoordinates[flight.destination],
+                    airportCoords[flight.departure],
+                    airportCoords[flight.destination],
                 ],
                 flight,
             }));
@@ -85,11 +93,11 @@ const FlightMap = () => {
             </nav>
 
             <div className="container-fluid p-4">
-                <h2 className="mb-4">Flight Map</h2>
+                <h2 className="mb-4 text-white text-shadow">Flight Map</h2>
 
                 {flights.length === 0 ? (
                     <div className="text-center py-5">
-                        <p className="text-muted">No flights to display on map</p>
+                        <p className="text-white text-shadow">No flights to display on map</p>
                         <Link to="/flights/add" className="btn btn-primary">
                             Add Your First Flight
                         </Link>
@@ -119,8 +127,8 @@ const FlightMap = () => {
 
                             {/* Add markers for airports */}
                             {flights.map((flight, index) => {
-                                const depCoords = airportCoordinates[flight.departure];
-                                const destCoords = airportCoordinates[flight.destination];
+                                const depCoords = airportCoords[flight.departure];
+                                const destCoords = airportCoords[flight.destination];
 
                                 return (
                                     <div key={index}>

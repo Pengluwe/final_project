@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { flightsAPI, uploadAPI } from '../services/api';
+import { flightsAPI, uploadAPI, airportAPI } from '../services/api';
 
 const AddFlight = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [generalError, setGeneralError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [airports, setAirports] = useState([]);
+
     const [formData, setFormData] = useState({
         airline: '',
         flightNumber: '',
@@ -18,24 +21,86 @@ const AddFlight = () => {
     });
     const [photos, setPhotos] = useState([]);
 
+    useEffect(() => {
+        const fetchAirports = async () => {
+            try {
+                const response = await airportAPI.getAll();
+                setAirports(response.data);
+            } catch (err) {
+                console.error('Failed to load airports', err);
+            }
+        };
+        fetchAirports();
+    }, []);
+
     const handleChange = (e) => {
+        const { name, value } = e.target;
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value,
+            [name]: value,
         });
+        if (fieldErrors[name]) {
+            setFieldErrors({
+                ...fieldErrors,
+                [name]: ''
+            });
+        }
     };
 
     const handlePhotoChange = (e) => {
         setPhotos(Array.from(e.target.files));
     };
 
+    const validateForm = () => {
+        const errors = {};
+
+        if (!formData.airline.trim()) {
+            errors.airline = '請輸入航空公司名稱';
+        }
+
+        if (!formData.flightNumber.trim()) {
+            errors.flightNumber = '請輸入航班號碼';
+        }
+
+        if (!formData.departure) {
+            errors.departure = '請選擇出發地';
+        }
+
+        if (!formData.destination) {
+            errors.destination = '請選擇目的地';
+        }
+
+        if (formData.departure && formData.destination && formData.departure === formData.destination) {
+            errors.destination = '出發地與目的地不能相同';
+        }
+
+        if (!formData.date) {
+            errors.date = '請選擇飛行日期';
+        }
+
+        if (!formData.seatClass) {
+            errors.seatClass = '請選擇艙等';
+        }
+
+        if (!formData.notes.trim()) {
+            errors.notes = '請輸入飛行心得與筆記';
+        }
+
+        setFieldErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
         setLoading(true);
-        setError('');
+        setGeneralError('');
 
         try {
-            // Upload photos first
             const photoUrls = [];
             for (const photo of photos) {
                 const formDataPhoto = new FormData();
@@ -44,7 +109,6 @@ const AddFlight = () => {
                 photoUrls.push(uploadResponse.data.imageUrl);
             }
 
-            // Create flight record
             const flightData = {
                 ...formData,
                 photos: photoUrls,
@@ -53,7 +117,7 @@ const AddFlight = () => {
             await flightsAPI.create(flightData);
             navigate('/flights/list');
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to add flight');
+            setGeneralError(err.response?.data?.message || 'Failed to add flight');
         } finally {
             setLoading(false);
         }
@@ -77,68 +141,76 @@ const AddFlight = () => {
                             <div className="card-body p-4">
                                 <h3 className="card-title mb-4">Add New Flight</h3>
 
-                                {error && (
+                                {generalError && (
                                     <div className="alert alert-danger" role="alert">
-                                        {error}
+                                        {generalError}
                                     </div>
                                 )}
 
-                                <form onSubmit={handleSubmit}>
+                                <form onSubmit={handleSubmit} noValidate>
                                     <div className="row">
                                         <div className="col-md-6 mb-3">
                                             <label htmlFor="airline" className="form-label">Airline *</label>
                                             <input
                                                 type="text"
-                                                className="form-control"
+                                                className={`form-control ${fieldErrors.airline ? 'is-invalid' : ''}`}
                                                 id="airline"
                                                 name="airline"
                                                 value={formData.airline}
                                                 onChange={handleChange}
-                                                required
                                             />
+                                            {fieldErrors.airline && <div className="invalid-feedback">{fieldErrors.airline}</div>}
                                         </div>
                                         <div className="col-md-6 mb-3">
                                             <label htmlFor="flightNumber" className="form-label">Flight Number *</label>
                                             <input
                                                 type="text"
-                                                className="form-control"
+                                                className={`form-control ${fieldErrors.flightNumber ? 'is-invalid' : ''}`}
                                                 id="flightNumber"
                                                 name="flightNumber"
                                                 value={formData.flightNumber}
                                                 onChange={handleChange}
-                                                required
                                             />
+                                            {fieldErrors.flightNumber && <div className="invalid-feedback">{fieldErrors.flightNumber}</div>}
                                         </div>
                                     </div>
 
                                     <div className="row">
                                         <div className="col-md-6 mb-3">
-                                            <label htmlFor="departure" className="form-label">Departure (IATA Code) *</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
+                                            <label htmlFor="departure" className="form-label">Departure (Airport) *</label>
+                                            <select
+                                                className={`form-select ${fieldErrors.departure ? 'is-invalid' : ''}`}
                                                 id="departure"
                                                 name="departure"
-                                                placeholder="e.g., TPE"
                                                 value={formData.departure}
                                                 onChange={handleChange}
-                                                maxLength="3"
-                                                required
-                                            />
+                                            >
+                                                <option value="">Select Departure Airport</option>
+                                                {airports.map(airport => (
+                                                    <option key={airport._id} value={airport.code}>
+                                                        {airport.code} - {airport.city} ({airport.name})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {fieldErrors.departure && <div className="invalid-feedback">{fieldErrors.departure}</div>}
                                         </div>
                                         <div className="col-md-6 mb-3">
-                                            <label htmlFor="destination" className="form-label">Destination (IATA Code) *</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
+                                            <label htmlFor="destination" className="form-label">Destination (Airport) *</label>
+                                            <select
+                                                className={`form-select ${fieldErrors.destination ? 'is-invalid' : ''}`}
                                                 id="destination"
                                                 name="destination"
-                                                placeholder="e.g., NRT"
                                                 value={formData.destination}
                                                 onChange={handleChange}
-                                                maxLength="3"
-                                                required
-                                            />
+                                            >
+                                                <option value="">Select Destination Airport</option>
+                                                {airports.map(airport => (
+                                                    <option key={airport._id} value={airport.code}>
+                                                        {airport.code} - {airport.city} ({airport.name})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {fieldErrors.destination && <div className="invalid-feedback">{fieldErrors.destination}</div>}
                                         </div>
                                     </div>
 
@@ -147,29 +219,29 @@ const AddFlight = () => {
                                             <label htmlFor="date" className="form-label">Flight Date *</label>
                                             <input
                                                 type="date"
-                                                className="form-control"
+                                                className={`form-control ${fieldErrors.date ? 'is-invalid' : ''}`}
                                                 id="date"
                                                 name="date"
                                                 value={formData.date}
                                                 onChange={handleChange}
-                                                required
                                             />
+                                            {fieldErrors.date && <div className="invalid-feedback">{fieldErrors.date}</div>}
                                         </div>
                                         <div className="col-md-6 mb-3">
                                             <label htmlFor="seatClass" className="form-label">Seat Class *</label>
                                             <select
-                                                className="form-select"
+                                                className={`form-select ${fieldErrors.seatClass ? 'is-invalid' : ''}`}
                                                 id="seatClass"
                                                 name="seatClass"
                                                 value={formData.seatClass}
                                                 onChange={handleChange}
-                                                required
                                             >
                                                 <option value="Economy">Economy</option>
                                                 <option value="Premium Economy">Premium Economy</option>
                                                 <option value="Business">Business</option>
                                                 <option value="First">First</option>
                                             </select>
+                                            {fieldErrors.seatClass && <div className="invalid-feedback">{fieldErrors.seatClass}</div>}
                                         </div>
                                     </div>
 
@@ -187,9 +259,9 @@ const AddFlight = () => {
                                     </div>
 
                                     <div className="mb-3">
-                                        <label htmlFor="notes" className="form-label">Notes</label>
+                                        <label htmlFor="notes" className="form-label">Notes *</label>
                                         <textarea
-                                            className="form-control"
+                                            className={`form-control ${fieldErrors.notes ? 'is-invalid' : ''}`}
                                             id="notes"
                                             name="notes"
                                             rows="3"
@@ -197,6 +269,7 @@ const AddFlight = () => {
                                             onChange={handleChange}
                                             placeholder="Share your flight experience..."
                                         ></textarea>
+                                        {fieldErrors.notes && <div className="invalid-feedback">{fieldErrors.notes}</div>}
                                     </div>
 
                                     <div className="mb-4">

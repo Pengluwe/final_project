@@ -9,6 +9,7 @@ const fs = require('fs');
 const authRoutes = require('./routes/authRoutes');
 const flightRoutes = require('./routes/flightRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const airportRoutes = require('./routes/airportRoutes');
 
 // Initialize express app
 const app = express();
@@ -31,6 +32,7 @@ app.use('/uploads', express.static(uploadsDir));
 app.use('/api/auth', authRoutes);
 app.use('/api/flights', flightRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/airports', airportRoutes);
 
 // Health check route
 app.get('/', (req, res) => {

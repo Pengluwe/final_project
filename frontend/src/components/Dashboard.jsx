@@ -48,8 +48,8 @@ const Dashboard = () => {
             <div className="container py-5">
                 <div className="row mb-4">
                     <div className="col">
-                        <h2 className="mb-3">My Flight Dashboard</h2>
-                        <p className="text-muted">Track and visualize your flight journey</p>
+                        <h2 className="mb-3 text-white text-shadow">My Flight Dashboard</h2>
+                        <p className="text-white text-shadow">Track and visualize your flight journey</p>
                     </div>
                 </div>
 

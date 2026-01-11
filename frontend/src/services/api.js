@@ -39,4 +39,12 @@ export const uploadAPI = {
     }),
 };
 
+// Airport API
+export const airportAPI = {
+    getAll: () => api.get('/airports'),
+    search: (query) => api.get(`/airports/search?query=${query}`),
+    getByCode: (code) => api.get(`/airports/${code}`),
+    getBatch: (codes) => api.post('/airports/batch', { codes }),
+};
+
 export default api;

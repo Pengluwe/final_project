@@ -1,0 +1,13 @@
+{
+    "name": "skymemories-root",
+    "version": "1.0.0",
+    "description": "Root package for starting SkyMemories",
+    "scripts": {
+        "start": "concurrently \"cd backend && npm start\" \"cd frontend && npm run dev\"",
+        "install:all": "cd backend && npm install && cd ../frontend && npm install",
+        "docker:up": "cd docker && docker-compose up -d"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
