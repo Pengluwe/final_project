@@ -37,7 +37,7 @@ SkyMemories 是一個專為航空愛好者與旅客設計的全端 Web 應用程
 ### 1. 複製專案 (Clone Repository)
 ```bash
 git clone <repository-url>
-cd skymemories
+cd final_project
 ```
 
 ### 2. 安裝依賴套件 (Install Dependencies)
