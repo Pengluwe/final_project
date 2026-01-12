@@ -57,7 +57,7 @@ cd ../frontend && npm install
 # backend/.env
 PORT=5001
 MONGODB_URI=mongodb://localhost:27017/skymemories
-JWT_SECRET=your_super_secret_key_here
+JWT_SECRET=your_jwt_secret_key_change_this_in_production
 ```
 
 ### 4. 啟動資料庫 (Start Database)
