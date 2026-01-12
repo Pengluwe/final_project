@@ -78,17 +78,17 @@ node seedAirports.js
 ## 使用指引 (Usage Guidelines)
 
 ### 啟動應用程式
-最簡單的方式是在 Windows 環境下使用提供的腳本：
-```bash
-.\scripts\start_app.bat
-```
-或是在根目錄使用 npm 指令：
+
+在根目錄使用 npm 指令：
 ```bash
 npm start
 ```
 
-*   **前端頁面**: http://localhost:5173
-*   **後端 API**: http://localhost:5001
+在第一次初始化完成後，日後可改成 Windows 環境下使用提供的腳本啟動與關閉：
+```bash
+.\scripts\start_app.bat
+.\scripts\stop_app.bat
+```
 
 ### 帳號測試
 
