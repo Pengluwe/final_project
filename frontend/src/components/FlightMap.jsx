@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
 
 const FlightMap = () => {
     const [flights, setFlights] = useState([]);
-    const [airportCoords, setAirportCoords] = useState({});
+    const [airportData, setAirportData] = useState({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -34,15 +34,15 @@ const FlightMap = () => {
                         codes.add(f.destination);
                     });
 
-                    // 3. Fetch coordinates for these airports
+                    // 3. Fetch details for these airports
                     const airportRes = await airportAPI.getBatch(Array.from(codes));
 
                     // 4. Map airport data to efficient lookup object
-                    const coordsMap = {};
+                    const dataMap = {};
                     airportRes.data.forEach(airport => {
-                        coordsMap[airport.code] = [airport.coordinates.lat, airport.coordinates.lng];
+                        dataMap[airport.code] = airport;
                     });
-                    setAirportCoords(coordsMap);
+                    setAirportData(dataMap);
                 }
             } catch (err) {
                 console.error('Failed to load map data', err);
@@ -57,16 +57,20 @@ const FlightMap = () => {
     const getFlightPaths = () => {
         return flights
             .filter(flight =>
-                airportCoords[flight.departure] &&
-                airportCoords[flight.destination]
+                airportData[flight.departure] &&
+                airportData[flight.destination]
             )
-            .map(flight => ({
-                positions: [
-                    airportCoords[flight.departure],
-                    airportCoords[flight.destination],
-                ],
-                flight,
-            }));
+            .map(flight => {
+                const dep = airportData[flight.departure];
+                const dest = airportData[flight.destination];
+                return {
+                    positions: [
+                        [dep.coordinates.lat, dep.coordinates.lng],
+                        [dest.coordinates.lat, dest.coordinates.lng],
+                    ],
+                    flight,
+                };
+            });
     };
 
     if (loading) {
@@ -125,32 +129,21 @@ const FlightMap = () => {
                                 />
                             ))}
 
-                            {/* Add markers for airports */}
-                            {flights.map((flight, index) => {
-                                const depCoords = airportCoords[flight.departure];
-                                const destCoords = airportCoords[flight.destination];
-
-                                return (
-                                    <div key={index}>
-                                        {depCoords && (
-                                            <Marker position={depCoords}>
-                                                <Popup>
-                                                    <strong>{flight.departure}</strong><br />
-                                                    Departure
-                                                </Popup>
-                                            </Marker>
-                                        )}
-                                        {destCoords && (
-                                            <Marker position={destCoords}>
-                                                <Popup>
-                                                    <strong>{flight.destination}</strong><br />
-                                                    Destination
-                                                </Popup>
-                                            </Marker>
-                                        )}
-                                    </div>
-                                );
-                            })}
+                            {/* Add markers for unique airports */}
+                            {Object.values(airportData).map((airport) => (
+                                <Marker
+                                    key={airport.code}
+                                    position={[airport.coordinates.lat, airport.coordinates.lng]}
+                                >
+                                    <Popup>
+                                        <div className="text-center">
+                                            <h5 className="mb-1">{airport.code}</h5>
+                                            <p className="mb-0 small text-muted">{airport.name}</p>
+                                            <p className="mb-0 small">{airport.city}, {airport.country}</p>
+                                        </div>
+                                    </Popup>
+                                </Marker>
+                            ))}
                         </MapContainer>
                     </div>
                 )}
