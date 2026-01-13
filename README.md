@@ -84,7 +84,7 @@ node seedAirports.js
 npm start
 ```
 
-在第一次初始化完成後，日後可改成 Windows 環境下使用提供的腳本啟動與關閉：
+在第一次初始化完成後，如遇到資料載入失敗，可使用以下腳本重新啟動，日後再次使用也可使用此腳本啟動與關閉：
 ```bash
 .\scripts\start_app.bat
 .\scripts\stop_app.bat
